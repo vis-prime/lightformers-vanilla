@@ -25,10 +25,10 @@ function updatePageDesc(path) {
   const paramsU = new URLSearchParams(window.location.search)
   paramsU.set("scene", path)
   window.history.replaceState({}, "", `${window.location.pathname}?${paramsU}`)
-  document.title = `Progressive Shadows | ${prettyName}`
+  document.title = `Lightformers | ${prettyName}`
 }
 const gui = new GUI({
-  title: "L Vanilla " + version,
+  title: "Lightformers Vanilla " + version,
   closeFolders: true,
 })
 gui

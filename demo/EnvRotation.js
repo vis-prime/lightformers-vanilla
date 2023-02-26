@@ -21,6 +21,7 @@ import {
   RepeatWrapping,
   ShadowMaterial,
   VSMShadowMap,
+  MathUtils,
 } from "three"
 import Stats from "three/examples/jsm/libs/stats.module"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
@@ -46,7 +47,7 @@ let stats,
 const params = {
   bgColor: new Color(),
   envRotation: 0,
-  autoRotate: false,
+  animateRotation: false,
   rotEnv: () => {},
   printCam: () => {},
 }
@@ -64,6 +65,18 @@ const intersects = [] //raycast
 
 let sceneGui
 let envObject, gpv, dirGroup
+
+let car,
+  sphere,
+  wheels = {
+    FL: null,
+    FR: null,
+    RL: null,
+    RR: null,
+    steerL: null,
+    steerR: null,
+    onAnimate: () => {},
+  }
 
 /**
  * PMREM
@@ -104,7 +117,7 @@ export async function initEnvRot(mainGui) {
 
   // light
   dirGroup = new Group()
-  const dirLight = new DirectionalLight(0xffffff, 1)
+  const dirLight = new DirectionalLight(0xffffeb, 1)
   dirLight.name = "Dir. Light"
   dirLight.position.set(10, 10, 10)
   dirLight.castShadow = true
@@ -122,10 +135,6 @@ export async function initEnvRot(mainGui) {
   dirGroup.add(dirLight)
   scene.add(dirGroup)
 
-  gui.add(dirLight.shadow, "radius").name("DIR radius").min(0).max(25)
-
-  gui.add(dirLight.shadow, "blurSamples", 1, 25, 1).name("DIR samples")
-
   envObject = new Mesh(
     new SphereGeometry(1).scale(1, 1, -1),
     new MeshBasicMaterial()
@@ -134,16 +143,22 @@ export async function initEnvRot(mainGui) {
   rgbeLoader.load(hdriURL, (texture) => {
     texture.mapping = EquirectangularReflectionMapping
     envObject.material.map = texture
-    // envObject.rotation.y = Math.PI / 2
-    // scene.background = texture
-    // scene.environment = texture
+
     scene.environment = pmremGenerator.fromScene(envObject).texture
   })
 
-  gui.add(params, "autoRotate")
-  gui.add(params, "envRotation", -Math.PI, Math.PI).onChange((v) => {
-    rotateEnv()
-  })
+  gui.add(params, "animateRotation").name("⚠ Animate Rotation")
+  gui
+    .add(params, "envRotation", -Math.PI, Math.PI, 0.05)
+    .name("🌏Env Rotation")
+    .onChange((v) => {
+      rotateEnv()
+    })
+
+  gui.add(dirLight.shadow, "radius").name("💡radius").min(0).max(25)
+  gui.add(dirLight.shadow, "blurSamples", 1, 25, 1).name("💡samples")
+  gui.addColor(dirLight, "color").name("💡Color")
+  gui.add(dirLight, "intensity", 0, 25, 0.01).name("💡Intensity")
 
   textureLoader.load(hdriWebPURL, (texture) => {
     texture.encoding = sRGBEncoding
@@ -224,18 +239,16 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight)
 }
 
-let updateCounter = 0
 function render() {
   stats.update()
   // Update the inertia on the orbit controls
   controls.update()
+  wheels.onAnimate()
 
-  if (params.autoRotate) {
+  if (params.animateRotation) {
     params.envRotation += 0.001
     rotateEnv()
-    updateCounter = 0
   }
-  updateCounter++
 
   renderer.render(scene, camera)
 }
@@ -257,7 +270,11 @@ function raycast() {
     return
   }
 
-  transformControls.attach(intersects[0].object)
+  if (intersects[0].object.raycastRoot) {
+    transformControls.attach(intersects[0].object.raycastRoot)
+  } else {
+    transformControls.detach()
+  }
 
   intersects.length = 0
 }
@@ -280,29 +297,20 @@ async function loadModels() {
   sphere.name = "sphere"
   sphere.castShadow = true
   sphere.receiveShadow = true
-  sphere.position.set(2, 0, -1.5)
+  sphere.position.set(2, 0, 0)
+  sphere.raycastRoot = sphere
   mainObjects.add(sphere)
 
-  const rTex = await textureLoader.loadAsync("/rgh.jpg")
-  rTex.wrapS = RepeatWrapping
-  rTex.wrapT = RepeatWrapping
-
-  rTex.repeat.set(2, 2)
   // floor
   const plane = new Mesh(
     new PlaneGeometry(10, 10).rotateX(-Math.PI / 2),
-    // new MeshStandardMaterial({
-
-    // color: getRandomHexColor(),
-    // roughness: 0,
-    // roughnessMap: rTex,
-    // metalness: 1,
     new ShadowMaterial({ opacity: 0.8 })
   )
   plane.name = "plane"
   plane.receiveShadow = true
   plane.position.set(0, -0.001, 0)
   mainObjects.add(plane)
+  gui.add(plane.material, "opacity", 0, 1, 0.01).name("💡Shadow opacity")
 
   // car
   const gltf = await gltfLoader.loadAsync(modelUrl)
@@ -310,11 +318,42 @@ async function loadModels() {
   model.name = "car"
   model.traverse((child) => {
     if (child.isMesh) {
+      child.raycastRoot = model
       child.castShadow = true
       child.receiveShadow = true
     }
   })
   mainObjects.add(model)
+
+  wheels.FL = model.getObjectByName("wheel_f_l")
+  wheels.FR = model.getObjectByName("wheel_f_r")
+  wheels.RL = model.getObjectByName("wheel_r_l")
+  wheels.RR = model.getObjectByName("wheel_r_r")
+  wheels.steerL = model.getObjectByName("steer_l")
+  wheels.steerR = model.getObjectByName("steer_r")
+
+  const carParams = {
+    wheelSpeed: 0.001,
+    steer: 0,
+  }
+  const steerLimit = MathUtils.degToRad(30)
+
+  gui.add(carParams, "wheelSpeed", 0, 0.1).name("🚗 speed")
+  gui
+    .add(carParams, "steer", -1, 1, 0.1)
+    .name("🚗 steer")
+    .onChange((v) => {
+      const rotY = MathUtils.mapLinear(v, -1, 1, -steerLimit, steerLimit)
+      wheels.steerL.rotation.y = rotY
+      wheels.steerR.rotation.y = rotY
+    })
+  wheels.onAnimate = () => {
+    if (carParams.wheelSpeed === 0) return
+    wheels.FL.rotation.x += carParams.wheelSpeed
+    wheels.FR.rotation.x += carParams.wheelSpeed
+    wheels.RL.rotation.x += carParams.wheelSpeed
+    wheels.RR.rotation.x += carParams.wheelSpeed
+  }
 }
 
 const color = new Color()
