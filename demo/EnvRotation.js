@@ -270,7 +270,6 @@ function updateEnvGui() {
     .onChange((v) => {
       updateEnv(v)
     })
-  envFolder.add(params, "animateRotation").name("⚠ Animate Rotation")
   envFolder
     .add(params, "envRotation", 0, 2 * Math.PI, 0.05)
     .name("🌏Env Rotation")
@@ -311,6 +310,7 @@ function updateEnvGui() {
         gpE.radius = v
       }
     })
+  envFolder.add(params, "animateRotation").name("⚠ Animate Rotation")
 }
 
 /**
