@@ -5,8 +5,7 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { TransformControls } from "three/examples/jsm/controls/TransformControls"
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment"
-import modelUrl from "../public/monkey.glb"
-import rghURL from "../public/rgh.jpg?url"
+import modelUrl from "../models/monkey.glb"
 
 import {
   ACESFilmicToneMapping,
@@ -254,7 +253,7 @@ async function loadModels() {
   cube.position.set(-1.5, 0, 1.5)
   mainObjects.add(cube)
 
-  const rTex = await textureLoader.loadAsync(rghURL)
+  const rTex = await textureLoader.loadAsync("/rgh.jpg")
   rTex.wrapS = RepeatWrapping
   rTex.wrapT = RepeatWrapping
 

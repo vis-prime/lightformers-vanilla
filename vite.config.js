@@ -11,7 +11,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1000,
   },
-  publicDir: "assets",
+  publicDir: "public",
   base: "./",
   server: {
     port: 3000,
