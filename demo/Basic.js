@@ -253,7 +253,7 @@ async function loadModels() {
   cube.position.set(-1.5, 0, 1.5)
   mainObjects.add(cube)
 
-  const rTex = await textureLoader.loadAsync("/rgh.jpg")
+  const rTex = await textureLoader.loadAsync("./rgh.jpg")
   rTex.wrapS = RepeatWrapping
   rTex.wrapT = RepeatWrapping
 

@@ -26,7 +26,7 @@ export default defineConfig({
         dedup(),
 
         textureCompress({
-          targetFormat: "webp",
+          targetFormat: "avif",
           encoder: sharp,
           resize: [resolution, resolution],
         }),
