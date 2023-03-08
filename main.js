@@ -4,13 +4,16 @@ import { version } from "./package.json"
 import { GUI } from "lil-gui"
 import { initBasic } from "./demo/Basic"
 import { initEnvRot } from "./demo/EnvRotation"
-initEnvRot
+import { initCountach } from "./demo/Countach"
+import { initMTM } from "./demo/MTMTest"
 
 let url_string = window.location.href
 let url = new URL(url_string)
 const AllScenes = {
   Basic: "basic",
   ENV: "env",
+  Countach: "countach",
+  MTM: "mtm",
 }
 const params = {
   sceneName: url.searchParams.get("scene") || AllScenes.Basic,
@@ -49,6 +52,16 @@ function loadScene(path) {
 
     case AllScenes.ENV: {
       initEnvRot(gui)
+      break
+    }
+
+    case AllScenes.Countach: {
+      initCountach(gui)
+      break
+    }
+
+    case AllScenes.MTM: {
+      initMTM(gui)
       break
     }
 
