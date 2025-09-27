@@ -1,6 +1,6 @@
 import Stats from "three/examples/jsm/libs/stats.module"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader"
+import { HDRLoader } from "three/examples/jsm/loaders/HDRLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { TransformControls } from "three/examples/jsm/controls/TransformControls"
@@ -14,7 +14,7 @@ import {
   PerspectiveCamera,
   Scene,
   SphereGeometry,
-  sRGBEncoding,
+  SRGBColorSpace,
   WebGLRenderer,
   Vector2,
   Raycaster,
@@ -42,7 +42,7 @@ const params = {
 }
 const mainObjects = new Group()
 const textureLoader = new TextureLoader()
-const rgbeLoader = new RGBELoader()
+const rgbeLoader = new HDRLoader()
 const gltfLoader = new GLTFLoader()
 const draco = new DRACOLoader()
 let transformControls
@@ -65,7 +65,6 @@ export async function initBasic(mainGui) {
   renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.shadowMap.enabled = true
-  renderer.outputEncoding = sRGBEncoding
   renderer.toneMapping = ACESFilmicToneMapping
 
   pmremGenerator = new PMREMGenerator(renderer)
@@ -117,7 +116,7 @@ export async function initBasic(mainGui) {
       }
     }
   })
-  scene.add(transformControls)
+  scene.add(transformControls.getHelper())
 
   window.addEventListener("resize", onWindowResize)
   document.addEventListener("pointermove", onPointerMove)
@@ -156,7 +155,7 @@ export async function initBasic(mainGui) {
     }
   })
   //   scene.add(e)
-  console.log(envObject)
+  // console.log(envObject)
 
   for (const mat of Object.values(mats)) {
     if (mat.color.r > 1) {

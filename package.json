@@ -9,18 +9,18 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
-    "@gltf-transform/core": "^3.0.4",
-    "@gltf-transform/extensions": "^3.0.4",
-    "@gltf-transform/functions": "^3.0.4",
-    "vite": "^2.9.15"
+    "@gltf-transform/core": "^4.2.1",
+    "@gltf-transform/extensions": "^4.2.1",
+    "@gltf-transform/functions": "^4.2.1",
+    "vite": "^7.1.7"
   },
   "dependencies": {
-    "@pmndrs/vanilla": "^1.1.0",
-    "gh-pages": "^5.0.0",
-    "lil-gui": "^0.18.0",
-    "sharp": "^0.31.3",
-    "three": "^0.150.0",
+    "@pmndrs/vanilla": "^1.9.4",
+    "gh-pages": "^6.3.0",
+    "lil-gui": "^0.20.0",
+    "sharp": "^0.34.4",
+    "three": "^0.180.0",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-gltf": "^3.1.0"
+    "vite-plugin-gltf": "^4.0.0"
   }
 }

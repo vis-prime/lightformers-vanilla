@@ -5,7 +5,7 @@ import {
   PerspectiveCamera,
   Scene,
   SphereGeometry,
-  sRGBEncoding,
+  SRGBColorSpace,
   WebGLRenderer,
   Vector2,
   Raycaster,
@@ -26,7 +26,7 @@ import {
 } from "three"
 import Stats from "three/examples/jsm/libs/stats.module"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader"
+import { HDRLoader } from "three/examples/jsm/loaders/HDRLoader"
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
@@ -107,7 +107,7 @@ const params = {
 
 const mainObjects = new Group()
 const textureLoader = new TextureLoader()
-const rgbeLoader = new RGBELoader()
+const rgbeLoader = new HDRLoader()
 const exrLoader = new EXRLoader()
 const gltfLoader = new GLTFLoader()
 const draco = new DRACOLoader()
@@ -145,7 +145,6 @@ export async function initCountach(mainGui) {
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.shadowMap.enabled = true
   // renderer.shadowMap.type = VSMShadowMap
-  renderer.outputEncoding = sRGBEncoding
   renderer.toneMapping = ACESFilmicToneMapping
 
   pmremGenerator = new PMREMGenerator(renderer)
@@ -198,7 +197,7 @@ export async function initCountach(mainGui) {
       }
     }
   })
-  scene.add(transformControls)
+  scene.add(transformControls.getHelper())
 
   window.addEventListener("resize", onWindowResize)
   app.addEventListener("pointermove", onPointerMove)
@@ -352,7 +351,7 @@ async function updateEnv(envDict) {
   envTexture.mapping = EquirectangularReflectionMapping
   envObject.material.map = envTexture
 
-  bgTexture.encoding = sRGBEncoding
+  bgTexture.colorSpace = SRGBColorSpace
   bgTexture.mapping = EquirectangularReflectionMapping
   bgTexture.magFilter = LinearFilter
   bgTexture.minFilter = LinearFilter
